@@ -38,7 +38,7 @@ function APIurl() {
 	return 'https://api.github.com/users/' + user + '/starred?client_id=e7881d948a0a7499bddf&client_secret=89369afecc8be691d087da9930e7376c07eaf08c&callback=?';
 }
 
-var WIDTH, HEIGHT, MAX_WATCHERS, BAR_WIDTH;
+var WIDTH, HEIGHT, MAX_WATCHERS, BAR_WIDTH, DATA_LENGTH;
 var c, ctx;
 var mouse = { x: 0, y: 0 };
 var animation = null;
@@ -104,12 +104,24 @@ function dataHasArrived () {
 
 function getMaxWatchers () {
 
-	var len = fullData.length;
+	DATA_LENGTH = fullData.length;
 
 	MAX_WATCHERS = 0;
 
-	for (var i = 0; i < len; i++) {
+	for (var i = 0; i < DATA_LENGTH; i++) {
 		MAX_WATCHERS = fullData[i].watchers > MAX_WATCHERS ? fullData[i].watchers : MAX_WATCHERS;
+	}
+
+	setupData();
+
+}
+
+function setupData () {
+	
+	for (var i = 0; i < DATA_LENGTH; i++) {
+		fullData[i].HEIGHT = 0;
+		fullData[i].MAX_HEIGHT = (fullData[i].watchers / MAX_WATCHERS) * HEIGHT;
+		fullData[i].VELOCITY = randomFromInterval(1, 3);
 	}
 
 	initCanvas();
@@ -140,6 +152,8 @@ function initCanvas () {
 
 		c.width = WIDTH;
 		c.height = HEIGHT;
+
+		setupData();
 	};
 
 }
@@ -151,8 +165,7 @@ function loop() {
 
 function draw () {
 
-	var len = fullData.length;
-	BAR_WIDTH = WIDTH / len;
+	BAR_WIDTH = WIDTH / DATA_LENGTH;
 
 	var barHeight;
 	var colour;
@@ -161,15 +174,17 @@ function draw () {
 	ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
 	ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-	for (var i = 0; i < len; i++) {
+	for (var i = 0; i < DATA_LENGTH; i++) {
 		
-		barHeight = (fullData[i].watchers / MAX_WATCHERS) * HEIGHT;
+		barHeight = fullData[i].HEIGHT;
 		colour = COLOURS[fullData[i].language] || '#505050';
 		x = i * BAR_WIDTH;
 		y = HEIGHT - barHeight;
 
 		ctx.fillStyle = colour;
 		ctx.fillRect(x, y, BAR_WIDTH, barHeight);
+
+		fullData[i].HEIGHT += ( fullData[i].HEIGHT < fullData[i].MAX_HEIGHT) ? ( 1 * fullData[i].VELOCITY ) : 0;
 
 	}
 
@@ -208,6 +223,10 @@ function drawText () {
 	ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
 	ctx.fillRect((hoverIndex*BAR_WIDTH), 0, BAR_WIDTH, HEIGHT);
 
+}
+
+function randomFromInterval (from, to) {
+	return Math.floor(Math.random() * (to - from+ 1 ) + from);
 }
 
 function mouseUp () {
