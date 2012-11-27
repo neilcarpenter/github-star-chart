@@ -1,4 +1,4 @@
-Playing around with GitHub API, bar graph of a user's starred repos
+Playing around with GitHub API, bar graph of a users starred repos
 ===================================================================
 
 Wanted to make something funky with [GitHub API](http://developer.github.com/v3/) and `canvas` that shows the repos a user has starred. Disclaimer - this demo is not funky. Just playing around really so next one will actually be interesting.
